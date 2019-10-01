@@ -34,11 +34,17 @@ Resources:
                 response = delete(resource_properties)
               else:
                 response = {}
+
               logger.info(json.dumps(response))
-              cfnresponse.send(event, context, cfnresponse.SUCCESS, response, 'xxx')
+
+              user_pool_id = response.get('ResourceServer', {}).get('UserPoolId', '')
+              identifier = response.get('ResourceServer', {}).get('Identifier', '')
+              physical_resource_id = '%s/%s' % (user_pool_id, identifier)
+
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response, physical_resource_id)
             except Exception as e:
               logger.error(e)
-              cfnresponse.send(event, context, cfnresponse.FAILED, {}, 'xxx')
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, '/')
           def create(properties):
             return client.create_resource_server(
               UserPoolId = properties.get('UserPoolId', ''),
