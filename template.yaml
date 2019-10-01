@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  CognitoCreateResourceServerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: cognito-create-resource-server
+      Runtime: python3.7
+      Code:
+        ZipFile: |
+          import json
+          import cfnresponse
+          import logging
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+          def handler(event, context):
+            responseData = {}
+            try:
+              logger.info(json.dumps(event))
+              responseValue = event['ResourceProperties']['UserPoolId']
+              responseData['Data'] = responseValue
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, "CustomResourcePhysicalID")
+            except Exception as e:
+              logger.error(e)
+              cfnresponse.send(event, context, cfnresponse.FAILED, responseData, "CustomResourcePhysicalID")
+      Handler: index.handler
+      Role: !GetAtt CognitoCreateResourceServerFunctionRole.Arn
+  CognitoCreateResourceServerFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action: 
+          - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+Outputs:
+  FunctionArn:
+    Value: !GetAtt CognitoCreateResourceServerFunction.Arn

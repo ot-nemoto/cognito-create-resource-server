@@ -1,1 +1,40 @@
 # cognito-create-resource-server
+
+## 概要
+
+- CloudFormationでCognitoのResourceServerを作成するためのLambda関数
+
+## デプロイ
+
+```sh
+aws cloudformation create-stack \
+    --stack-name cognito-create-resource-server \
+    --capabilities CAPABILITY_IAM \
+    --template-body file://template.yaml
+```
+
+## 使い方
+
+FunctionのARNを取得
+
+```sh
+FUNCTION_ARN=$(aws cloudformation describe-stacks \
+    --stack-name cognito-create-resource-server \
+    --query 'Stacks[].Outputs[?OutputKey==`FunctionArn`].OutputValue' \
+    --output text)
+echo ${FUNCTION_ARN}
+  #
+```
+
+Cognitoのユーザプールを作成
+
+```sh
+aws cloudformation create-stack \
+    --stack-name example-cognito \
+    --parameters ParameterKey=CreateResourceServerArn,ParameterValue=${FUNCTION_ARN} \
+    --template-body file://cognito-template.yaml
+```
+
+## 参照
+
+- [cfn-response Module](https://docs.aws.amazon.com/en_pv/AWSCloudFormation/latest/UserGuide/cfn-lambda-function-code-cfnresponsemodule.html)
