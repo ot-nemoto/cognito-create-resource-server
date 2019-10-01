@@ -1,31 +1,53 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Resources:
-  CognitoCreateResourceServerFunction:
+  CognitoResourceServerFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: cognito-create-resource-server
+      FunctionName: cognito-resource-server
       Runtime: python3.7
       Code:
         ZipFile: |
           import json
           import cfnresponse
+          import boto3
           import logging
           logger = logging.getLogger()
           logger.setLevel(logging.INFO)
           def handler(event, context):
-            responseData = {}
+            response = {}
             try:
               logger.info(json.dumps(event))
-              responseValue = event['ResourceProperties']['UserPoolId']
-              responseData['Data'] = responseValue
-              cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, "CustomResourcePhysicalID")
+              client = boto3.client('cognito-idp')
+              resource_properties = event.get('ResourceProperties', {})
+              if event.get('RequestType', '') == 'Create':
+                response = client.create_resource_server(
+                  UserPoolId = resource_properties.get('UserPoolId', ''),
+                  Identifier = resource_properties.get('Identifier', ''),
+                  Name = resource_properties.get('Name', ''),
+                  Scopes = resource_properties.get('Scopes', [])
+                )
+              elif event.get('RequestType', '') == 'Update':
+                response = client.update_resource_server(
+                  UserPoolId = resource_properties.get('UserPoolId', ''),
+                  Identifier = resource_properties.get('Identifier', ''),
+                  Name = resource_properties.get('Name', ''),
+                  Scopes = resource_properties.get('Scopes', [])
+                )
+              elif event.get('RequestType', '') == 'Delete':
+                response = client.delete_resource_server(
+                  UserPoolId = resource_properties.get('UserPoolId', ''),
+                  Identifier = resource_properties.get('Identifier', '')
+                )
+              else:
+                response = {}
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response, "CustomResourcePhysicalID")
             except Exception as e:
               logger.error(e)
-              cfnresponse.send(event, context, cfnresponse.FAILED, responseData, "CustomResourcePhysicalID")
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, "CustomResourcePhysicalID")
       Handler: index.handler
-      Role: !GetAtt CognitoCreateResourceServerFunctionRole.Arn
-  CognitoCreateResourceServerFunctionRole:
+      Role: !GetAtt CognitoResourceServerFunctionRole.Arn
+  CognitoResourceServerFunctionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -40,7 +62,18 @@ Resources:
       Path: /
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+      - PolicyName: CognitoResourceServerFunctionPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - cognito-idp:CreateResourceServer
+            - cognito-idp:UpdateResourceServer
+            - cognito-idp:DeleteResourceServer
+            Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*"
 
 Outputs:
   FunctionArn:
-    Value: !GetAtt CognitoCreateResourceServerFunction.Arn
+    Value: !GetAtt CognitoResourceServerFunction.Arn

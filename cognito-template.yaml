@@ -1,25 +1,20 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
-  CreateResourceServerArn:
+  FunctionArn:
     Type: String
 
 Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
-  UserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      UserPoolId: !Ref UserPool
 
   ResourceServer:
     Type: Custom::CognitoResourceServer
     Properties:
-      ServiceToken: !Ref CreateResourceServerArn
+      ServiceToken: !Ref FunctionArn
       UserPoolId: !Ref UserPool
       Identifier: example-user-pool-client
       Name: example-user-pool-client
       Scopes:
-      - ScopeName: test
-        ScopeDescription: test
-    DependsOn: UserPool
+      - ScopeName: scope-name
+        ScopeDescription: scope-description
