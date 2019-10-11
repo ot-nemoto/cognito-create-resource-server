@@ -4,6 +4,10 @@
 
 - CloudFormationでCognitoのResourceServerを作成するためのLambda関数
 
+## 構成
+
+![構成](https://github.com/ot-nemoto/cognito-create-resource-server/blob/images/cognito-create-resource-server.png)
+
 ## デプロイ
 
 ```sh
