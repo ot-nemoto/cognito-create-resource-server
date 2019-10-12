@@ -42,3 +42,6 @@ aws cloudformation create-stack \
 ## 参照
 
 - [cfn-response Module](https://docs.aws.amazon.com/en_pv/AWSCloudFormation/latest/UserGuide/cfn-lambda-function-code-cfnresponsemodule.html)
+- [crpg-ref-requesttypes-create](https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/crpg-ref-requesttypes-create.html)
+- [crpg-ref-requesttypes-delete](https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/crpg-ref-requesttypes-delete.html)
+- [crpg-ref-requesttypes-update](https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/crpg-ref-requesttypes-update.html)
