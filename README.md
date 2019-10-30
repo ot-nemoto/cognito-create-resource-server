@@ -6,7 +6,7 @@
 
 ## 構成
 
-![構成](https://github.com/ot-nemoto/cognito-create-resource-server/blob/images/cognito-create-resource-server.png)
+![構成](https://github.com/ot-nemoto/cognito-resource-server/blob/images/cognito-create-resource-server.png)
 
 ## デプロイ
 
